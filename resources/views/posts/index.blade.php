@@ -27,7 +27,7 @@
         Hanapin ang abiso
     </label>
 
-    <div class="flex flex-col gap-3 sm:flex-row">
+    <div class="flex flex-col gap-3 md:flex-row">
 
         <div class="relative flex-1">
             <svg class="pointer-events-none absolute left-3.5 top-1/2 h-[18px] w-[18px] -translate-y-1/2"
@@ -37,7 +37,7 @@
             </svg>
 
             <input id="q" type="search" name="q" value="{{ request('q') }}"
-                 
+                   placeholder="Halimbawa: clean-up, bakuna, ayuda"
                    class="w-full rounded-[3px] border border-[#CFC7B2] bg-white py-2.5 pl-11 pr-3
                           text-[15px] placeholder:text-[#A39C8A]
                           focus:border-[#1F4D3A] focus:outline-none focus:ring-2 focus:ring-[#1F4D3A]/20">
@@ -52,6 +52,15 @@
             @endforeach
         </select>
 
+        <select name="tag" aria-label="Tag"
+                class="rounded-[3px] border border-[#CFC7B2] bg-white px-3 py-2.5 text-[15px]
+                       focus:border-[#1F4D3A] focus:outline-none focus:ring-2 focus:ring-[#1F4D3A]/20">
+            <option value="">Lahat ng tag</option>
+            @foreach ($tags as $t)
+                <option value="{{ $t->name }}" @selected(request('tag') === $t->name)>{{ $t->name }}</option>
+            @endforeach
+        </select>
+
         <button type="submit"
                 class="rounded-[3px] bg-[#1F4D3A] px-7 py-2.5 text-[15px] font-medium text-[#FAF6EC]
                        hover:bg-[#163A2B] focus:outline-none focus:ring-2 focus:ring-[#C9A227]">
@@ -59,7 +68,7 @@
         </button>
     </div>
 
-    @if (request()->filled('q') || request()->filled('category'))
+    @if (request()->filled('q') || request()->filled('category') || request()->filled('tag'))
         <p class="mt-3 text-[13px] text-[#7A7465]">
             {{ $posts->total() }} abisong tumugma.
             <a href="{{ route('posts.index') }}" class="ml-1 border-b border-[#1F4D3A] pb-px font-medium text-[#1F4D3A]">
@@ -83,7 +92,7 @@
                     <circle cx="17.9" cy="6.1" r="2.4" fill="#E4C14F"/>
                 </svg>
 
-                <p class="text-[13px] font-medium text-[#8A6E12]">Nakapaskil sa board</p>
+                <p class="text-[13px] font-medium text-[#8A6E12]">Pinned</p>
 
                 <h2 class="mt-2 max-w-[28ch] text-[26px] font-semibold leading-[1.15] sm:text-[34px]">
                     <a href="{{ route('posts.show', $post->id) }}" class="hover:underline">
@@ -91,15 +100,31 @@
                     </a>
                 </h2>
 
+                <p class="mt-2 text-[14px] text-[#5C5749]">
+                    ni
+                    <a href="{{ route('authors.show', $post->author) }}" class="font-medium text-[#1F4D3A] hover:underline">
+                        {{ $post->author->name }}
+                    </a>
+                </p>
+
                 <p class="mt-4 max-w-[62ch] text-[16px] leading-[1.7] text-[#4A463C]">
                     {{ Str::limit($post->body, 200) }}
                 </p>
 
+                <div class="mt-5 flex flex-wrap gap-2">
+                    @foreach ($post->tags as $tag)
+                        <a href="{{ route('posts.index', ['tag' => $tag->name]) }}"
+                           class="rounded-[3px] bg-[#F1EDE0] px-2.5 py-1 text-[12px] font-medium text-[#5C5749] hover:bg-[#E6E0CE]">
+                            {{ $tag->name }}
+                        </a>
+                    @endforeach
+                </div>
+
                 <div class="mt-6 flex flex-wrap gap-x-8 gap-y-2 border-t border-[#EFEAD9] pt-4 text-[13px] text-[#7A7465]">
                     <span class="font-medium {{ $ink[$post->category] ?? 'text-[#4A463C]' }}">{{ $post->category }}</span>
                     <span>{{ $post->published_at->format('j F Y') }}</span>
-                    <span>{{ $post->views }} nabasa</span>
-                    <span>Opisyal #{{ $post->author_id }}</span>
+                    <span>{{ $post->views }} views</span>
+                    <span>{{ $post->comments_count }} comments</span>
                 </div>
             </article>
 
@@ -117,10 +142,26 @@
                     </a>
                 </h2>
 
-                <div class="mt-auto flex flex-wrap gap-x-5 gap-y-1 pt-6 text-[12px] text-[#8A8474]">
+                <p class="mt-1.5 text-[13px] text-[#5C5749]">
+                    ni
+                    <a href="{{ route('authors.show', $post->author) }}" class="font-medium text-[#1F4D3A] hover:underline">
+                        {{ $post->author->name }}
+                    </a>
+                </p>
+
+                <div class="mt-4 flex flex-wrap gap-1.5">
+                    @foreach ($post->tags as $tag)
+                        <a href="{{ route('posts.index', ['tag' => $tag->name]) }}"
+                           class="rounded-[3px] bg-[#F1EDE0] px-2 py-0.5 text-[11px] font-medium text-[#5C5749] hover:bg-[#E6E0CE]">
+                            {{ $tag->name }}
+                        </a>
+                    @endforeach
+                </div>
+
+                <div class="mt-auto flex flex-wrap gap-x-5 gap-y-1 pt-5 text-[12px] text-[#8A8474]">
                     <span>{{ $post->published_at->format('j M Y') }}</span>
-                    <span>{{ $post->views }} nabasa</span>
-                    <span>Opisyal #{{ $post->author_id }}</span>
+                    <span>{{ $post->views }} views</span>
+                    <span>{{ $post->comments_count }} comments</span>
                 </div>
             </article>
 
@@ -130,7 +171,7 @@
         <div class="col-span-full rounded-[3px] border border-dashed border-[#CFC7B2] bg-white px-6 py-16 text-center">
             <p class="font-notice text-[20px]">No posts match your search.</p>
             <p class="mt-2 text-[14px] text-[#7A7465]">
-                Subukang alisin ang kategorya o gumamit ng mas maikling salita.
+                Subukang alisin ang kategorya o tag, o gumamit ng mas maikling salita.
             </p>
             <a href="{{ route('posts.index') }}"
                class="mt-5 inline-block border-b border-[#1F4D3A] pb-0.5 text-[14px] font-medium text-[#1F4D3A]">

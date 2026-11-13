@@ -74,7 +74,49 @@
 
     <h2 class="text-[22px] font-semibold">Comments</h2>
 
-    {{-- Comment form goes here in Step 20 --}}
+        <div id="comment-form" class="mt-5">
+        @auth
+            <form method="POST" action="{{ route('comments.store', $post) }}"
+                  class="rounded-[3px] border border-[#E2DCCB] bg-white p-5">
+                @csrf
+
+                @if ($errors->any())
+                    <div class="mb-4 rounded-[3px] border border-[#A33A3A]/30 bg-[#FBEDED] px-4 py-3">
+                        <p class="text-[14px] font-medium text-[#7D2A2A]">Your comment wasn't posted:</p>
+                        <ul class="mt-1 list-disc pl-5 text-[13px] text-[#7D2A2A]">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+
+                <label for="body" class="mb-1.5 block text-[13px] font-medium text-[#5C5749]">
+                    Write a comment as {{ auth()->user()->name }}
+                </label>
+
+                <textarea id="body" name="body" rows="3"
+                          class="w-full rounded-[3px] border bg-white px-3 py-2.5 text-[15px]
+                                 focus:outline-none focus:ring-2 focus:ring-[#1F4D3A]/20
+                                 @error('body') border-[#A33A3A] @else border-[#CFC7B2] focus:border-[#1F4D3A] @enderror">{{ old('body') }}</textarea>
+
+                @error('body')
+                    <p class="mt-1.5 text-[13px] text-[#A33A3A]">{{ $message }}</p>
+                @enderror
+
+                <button type="submit"
+                        class="mt-3 rounded-[3px] bg-[#1F4D3A] px-5 py-2.5 text-[14px] font-medium text-[#FAF6EC]
+                               hover:bg-[#163A2B] focus:outline-none focus:ring-2 focus:ring-[#C9A227]">
+                    Post comment
+                </button>
+            </form>
+        @else
+            <div class="rounded-[3px] border border-dashed border-[#CFC7B2] bg-white px-5 py-5 text-[14px] text-[#5C5749]">
+                <a href="{{ route('login') }}" class="font-medium text-[#1F4D3A] underline underline-offset-4">Sign in to comment</a>
+                <span class="text-[#7A7465]"> on this post.</span>
+            </div>
+        @endauth
+    </div>
 
     <div class="mt-6 space-y-4">
         @forelse ($post->comments as $comment)

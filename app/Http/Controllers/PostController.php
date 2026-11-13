@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StorePostRequest;
 use App\Models\Post;
 use App\Models\Tag;
 use Illuminate\Http\Request;
@@ -57,5 +58,32 @@ class PostController extends Controller
         ]);
 
         return view('posts.show', compact('post'));
+    }
+
+    public function create()
+    {
+        $categories = ['Announcement', 'Health', 'Peace & Order', 'Ayuda', 'Lost & Found'];
+        $tags = Tag::orderBy('name')->get();
+
+        return view('posts.create', compact('categories', 'tags'));
+    }
+
+    public function store(StorePostRequest $request)
+    {
+        $data = $request->safe()->except('tags');
+        $data['published_at'] = $data['is_published'] ? now() : null;
+
+        $post = $request->user()->author->posts()->create($data);
+        $post->tags()->sync($request->validated('tags'));
+
+        if ($post->is_published) {
+            return redirect()
+                ->route('posts.show', $post->id)
+                ->with('status', 'Post published.');
+        }
+
+        return redirect()
+            ->route('posts.index')
+            ->with('status', 'Draft saved. It will not appear on the bulletin until it is published.');
     }
 }
